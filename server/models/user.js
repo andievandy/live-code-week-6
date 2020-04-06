@@ -8,19 +8,36 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
-    email: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING,
+      validate: {
+        isUnique: (value, next) => {
+          User.findOne({
+            where: {
+              email: value
+            }
+          }).then(data => {
+            if(data) {
+              next('Email has been registered');
+            } else {
+              next();
+            }
+          })
+        }
+      }
+    },
     password: DataTypes.STRING
   }, {
     sequelize,
     hooks: {
       beforeCreate: (user, options) => {
         if (user.password) {
-          bcrypt.hashSync(user.password, 10);
+          user.password = bcrypt.hashSync(user.password, 10);
         }
       },
       beforeUpdate: (user, options) => {
         if (user.password) {
-          bcrypt.hashSync(user.password, 10);
+          user.password = bcrypt.hashSync(user.password, 10);
         }
       }
     }
