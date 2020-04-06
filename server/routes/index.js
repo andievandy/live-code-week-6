@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const jwt = require('jsonwebtoken');
 const mainRouter = Router();
 const {User, Food} = require('../models');
 
@@ -15,6 +16,23 @@ mainRouter.post('/register', (req, res, next) => {
         });
     }).catch(next);
 });
+mainRouter.post('/login', (req, res, next) => {
+    User.findOne({
+        where: {
+            email: req.body.email
+        }
+    }).then(data => {
+        if(data && data.checkPassword(req.body.password)) {
+            let access_token = jwt.sign({
+                id: data.id,
+                email: data.email
+            }, process.env.JWT_SECRETKEY);
+            res.status(200).json({access_token});
+        } else {
+            res.status(400).json({error: 'Invalid username/password'});
+        }
+    }).catch(next);
+})
 mainRouter.use(errorHandler);
 
 module.exports = mainRouter;
