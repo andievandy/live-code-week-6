@@ -10,7 +10,14 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     email: {
       type: DataTypes.STRING,
+      allowNull: false,
       validate: {
+        notNull: {
+          msg: 'email is required'
+        },
+        notEmpty: {
+          msg: 'email is required'
+        },
         isUnique: (value, next) => {
           User.findOne({
             where: {
@@ -26,7 +33,18 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    password: DataTypes.STRING
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'password is required'
+        },
+        notEmpty: {
+          msg: 'password is required'
+        }
+      }
+    }
   }, {
     sequelize,
     hooks: {
