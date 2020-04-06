@@ -2,7 +2,16 @@
 module.exports = (sequelize, DataTypes) => {
   const { Model } = sequelize.Sequelize;
   class Food extends Model {
-
+    getViewableData() {
+      return {
+        id: this.id,
+        title: this.title,
+        price: this.price,
+        ingredients: this.ingredients,
+        tag: this.tag,
+        UserId: this.UserId
+      }
+    }
   }
   Food.init({
     title: {

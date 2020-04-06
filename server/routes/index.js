@@ -5,6 +5,7 @@ const {User, Food} = require('../models');
 
 const errorHandler = require('../middlewares/errorhandler');
 const authentication = require('../middlewares/authentication');
+const authorization = require('../middlewares/authorization');
 
 mainRouter.post('/register', (req, res, next) => {
     User.create({
@@ -50,23 +51,24 @@ mainRouter.post('/foods', authentication, (req, res, next) => {
             UserId: data.UserId
         });
     }).catch(next);
-})
+});
 mainRouter.get('/foods', authentication, (req, res, next) => {
-    // Food.findAll()
-    req.user.getFood().then(data => {
-        let viewableData = data.map(food => {
-            return {
-                id: food.id,
-                title: food.title,
-                price: food.price,
-                ingredients: food.ingredients,
-                tag: food.tag,
-                UserId: food.UserId
-            }
-        })
+    Food.findAll({
+        where: {
+            UserId: req.userId
+        }
+    }).then(data => {
+        let viewableData = data.map(food => food.getViewableData());
         res.status(200).json(viewableData);
     }).catch(next);
 });
+mainRouter.delete('/foods/:id', authentication, authorization, (req, res, next) => {
+    req.food.destroy().then(() => {
+        res.status(200).json({
+            message: 'Successfully delete food from your menu'
+        })
+    }).catch(next);
+})
 mainRouter.use(errorHandler);
 
 module.exports = mainRouter;
